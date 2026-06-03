@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -25,19 +26,33 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.ccs.thaparbitesshop.ui.login.LoginViewModel
 
 @Composable
 fun LoginScreen(
+    viewModel: LoginViewModel,
     onLoginSuccess: () -> Unit,
-    onNavigateToRegister: () -> Unit
-) {
+    onNavigateToRegister: () -> Unit,
+    onGoogleSignIn: () -> Unit
+){
 
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+
     var passwordVisible by remember { mutableStateOf(false) }
-    var isLoading by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf("") }
+    val state by viewModel
+        .uiState
+        .collectAsStateWithLifecycle()
+
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(state.loginSuccess) {
+
+        if (state.loginSuccess) {
+            onLoginSuccess()
+        }
+    }
 
     val orangePrimary = Color(0xFFFF6B35)
     val orangeLight = Color(0xFFFF8C61)
@@ -118,8 +133,8 @@ fun LoginScreen(
 
                     // Email field
                     OutlinedTextField(
-                        value = email,
-                        onValueChange = { email = it; errorMessage = "" },
+                        value = state.email,
+                        onValueChange = viewModel::updateEmail,
                         label = { Text("Email") },
                         leadingIcon = {
                             Icon(
@@ -143,8 +158,8 @@ fun LoginScreen(
 
                     // Password field
                     OutlinedTextField(
-                        value = password,
-                        onValueChange = { password = it; errorMessage = "" },
+                        value = state.password,
+                        onValueChange = viewModel::updatePassword,
                         label = { Text("Password") },
                         leadingIcon = {
                             Icon(
@@ -186,9 +201,10 @@ fun LoginScreen(
                     }
 
                     // Error message
-                    if (errorMessage.isNotEmpty()) {
+                    state.error?.let { message ->
+
                         Text(
-                            text = errorMessage,
+                            text = message,
                             color = MaterialTheme.colorScheme.error,
                             fontSize = 13.sp,
                             textAlign = TextAlign.Center,
@@ -201,22 +217,16 @@ fun LoginScreen(
                     // Login button
                     Button(
                         onClick = {
-                            if (email.isBlank() || password.isBlank()) {
-                                errorMessage = "Please fill in all fields"
-                            } else {
-                                isLoading = true
-                                // TODO: Firebase Auth login
-                                onLoginSuccess()
-                            }
+                            viewModel.login()
                         },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(52.dp),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = orangePrimary),
-                        enabled = !isLoading
+                        enabled = !state.isLoading
                     ) {
-                        if (isLoading) {
+                        if (state.isLoading) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(22.dp),
                                 color = Color.White,
@@ -225,6 +235,34 @@ fun LoginScreen(
                         } else {
                             Text(
                                 text = "Sign In",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Button(
+                        onClick = {
+                            onGoogleSignIn()
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = orangePrimary),
+                        enabled = !state.isLoading
+                    ) {
+                        if (state.isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(22.dp),
+                                color = Color.White,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text(
+                                text = "Continue with Google",
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.SemiBold
                             )

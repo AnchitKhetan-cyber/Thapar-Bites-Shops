@@ -3,6 +3,9 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 
+    kotlin("kapt")
+
+    id("com.google.dagger.hilt.android")
     id("com.google.gms.google-services")
 }
 
@@ -81,6 +84,7 @@ dependencies {
     implementation("androidx.credentials:credentials:1.3.0")
     implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+    implementation(libs.androidx.foundation)
 
     // Testing
     testImplementation(libs.junit)
@@ -100,4 +104,10 @@ dependencies {
 
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
 
+    kapt("com.google.dagger:hilt-compiler:2.57.1")
+
+}
+
+kapt {
+    correctErrorTypes = true
 }
