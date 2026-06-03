@@ -1,9 +1,8 @@
-package com.ccs.thaparbitesshop.ui.splash
+package com.example.thaparbites.shops.ui.screens
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -13,216 +12,162 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.ccs.thaparbitesshop.ui.theme.Crimson500
-import com.ccs.thaparbitesshop.ui.theme.Crimson700
-import com.ccs.thaparbitesshop.ui.theme.Gold200
-import com.ccs.thaparbitesshop.ui.theme.Poppins
-import com.ccs.thaparbitesshop.ui.theme.White
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
-// ─────────────────────────────────────────────────────────────
-// SplashScreen
-//
-// Flow:
-//   1. Crimson background fades in
-//   2. Logo icon bounces in (scale + alpha)
-//   3. App name slides up + fades in
-//   4. Tagline fades in
-//   5. After 2.5 s → check Firebase auth state → navigate
-//
-// Usage in NavGraph:
-//   composable("splash") {
-//       SplashScreen(
-//           onNavigateToLogin     = { navController.navigate("login") { popUpTo("splash") { inclusive = true } } },
-//           onNavigateToHome      = { navController.navigate("home")  { popUpTo("splash") { inclusive = true } } },
-//       )
-//   }
-// ─────────────────────────────────────────────────────────────
+// Brand colors — keep in sync with your theme
+private val OrangePrimary = Color(0xFFFF6B00)
+private val OrangeDark   = Color(0xFFCC5500)
+private val BgDark       = Color(0xFF1A1A1A)
+private val TextWhite    = Color(0xFFFAFAFA)
+private val TextMuted    = Color(0xFFB0B0B0)
 
+/**
+ * SplashScreen
+ *
+ * Shown for ~2 s on cold launch. Animates the logo icon, app name, and
+ * tagline in with a scale + fade sequence, then calls [onSplashFinished]
+ * so the NavHost can navigate to LoginScreen.
+ *
+ * Usage in NavHost:
+ *   composable("splash") {
+ *       SplashScreen(onSplashFinished = { navController.navigate("login") {
+ *           popUpTo("splash") { inclusive = true }
+ *       }})
+ *   }
+ */
 @Composable
-fun SplashScreen(
-    onNavigateToLogin: () -> Unit,
-    onNavigateToHome : () -> Unit,
-    viewModel        : SplashViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
-) {
-    val authState by viewModel.authState.collectAsState()
+fun SplashScreen(onSplashFinished: () -> Unit) {
 
-    // ── Animation states ──────────────────────────────────────
+    // ── Animations ────────────────────────────────────────────────────────────
 
-    // 1. Background
-    val bgAlpha = remember { Animatable(0f) }
-
-    // 2. Logo icon — bouncy scale-in
-    val logoScale = remember { Animatable(0.3f) }
+    // Logo: scale from 0.4 → 1.0, alpha 0 → 1
+    val logoScale = remember { Animatable(0.4f) }
     val logoAlpha = remember { Animatable(0f) }
 
-    // 3. App name — slide up + fade
-    val nameOffsetY = remember { Animatable(40f) }
-    val nameAlpha   = remember { Animatable(0f) }
+    // App name: fades in after logo settles
+    val titleAlpha = remember { Animatable(0f) }
 
-    // 4. Tagline — fade only
-    val tagAlpha = remember { Animatable(0f) }
+    // Tagline: fades in last
+    val taglineAlpha = remember { Animatable(0f) }
 
-    // 5. "SHOP" badge
-    val badgeAlpha = remember { Animatable(0f) }
-    val badgeScale = remember { Animatable(0.6f) }
+    // "Shop Partner" badge: slides up + fades in
+    val badgeOffsetY = remember { Animatable(20f) }
+    val badgeAlpha  = remember { Animatable(0f) }
 
     LaunchedEffect(Unit) {
-        // Step 1 — bg
-        bgAlpha.animateTo(1f, tween(300))
-
-        // Step 2 — logo bounces in
-        launch {
-            logoAlpha.animateTo(1f, tween(400))
-        }
+        // 1. Logo pop
         logoScale.animateTo(
             targetValue = 1f,
             animationSpec = spring(
                 dampingRatio = Spring.DampingRatioMediumBouncy,
-                stiffness    = Spring.StiffnessMedium,
+                stiffness    = Spring.StiffnessMedium
             )
         )
+        logoAlpha.animateTo(1f, tween(300))
 
+        // 2. Title
         delay(100)
+        titleAlpha.animateTo(1f, tween(400))
 
-        // Step 3 — app name slides up
-        launch { nameAlpha.animateTo(1f, tween(400)) }
-        nameOffsetY.animateTo(0f, tween(400, easing = FastOutSlowInEasing))
+        // 3. Tagline + badge together
+        delay(150)
+        taglineAlpha.animateTo(1f, tween(400))
+        badgeAlpha.animateTo(1f, tween(350))
+        badgeOffsetY.animateTo(0f, tween(350, easing = EaseOutCubic))
 
-        delay(80)
-
-        // Step 4 — tagline
-        tagAlpha.animateTo(1f, tween(350))
-
-        delay(80)
-
-        // Step 5 — SHOP badge
-        launch { badgeAlpha.animateTo(1f, tween(300)) }
-        badgeScale.animateTo(1f, spring(dampingRatio = Spring.DampingRatioLowBouncy))
-
-        // Wait, then navigate based on auth
+        // 4. Hold then exit
         delay(900)
+        onSplashFinished()
     }
 
-    // Navigate when auth state is resolved
-    LaunchedEffect(authState) {
-        when (authState) {
-            AuthState.LoggedIn  -> onNavigateToHome()
-            AuthState.LoggedOut -> onNavigateToLogin()
-            AuthState.Loading   -> { /* wait */ }
-        }
-    }
+    // ── UI ────────────────────────────────────────────────────────────────────
 
-    // ── UI ────────────────────────────────────────────────────
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .alpha(bgAlpha.value)
-            .background(Crimson500),
-        contentAlignment = Alignment.Center,
+            .background(BgDark),
+        contentAlignment = Alignment.Center
     ) {
-
-        // Subtle bottom decoration strip
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(4.dp)
-                .align(Alignment.BottomCenter)
-                .background(Crimson700),
-        )
-
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Center
         ) {
 
-            // ── Logo icon ─────────────────────────────────────
-            // Replace this Box with your actual Image(painterResource(R.drawable.ic_logo))
-            Box(
+            // ── Logo icon (emoji placeholder — swap with your actual drawable) ──
+            Text(
+                text = "🍽️",
+                fontSize = 72.sp,
                 modifier = Modifier
                     .scale(logoScale.value)
                     .alpha(logoAlpha.value)
-                    .size(100.dp)
-                    .background(
-                        color        = White.copy(alpha = 0.15f),
-                        shape        = androidx.compose.foundation.shape.CircleShape,
-                    ),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text  = "🍽",
-                    fontSize = 48.sp,
-                )
-            }
+            )
 
-            Spacer(Modifier.height(28.dp))
+            Spacer(Modifier.height(20.dp))
 
-            // ── App name ──────────────────────────────────────
+            // ── App name ──────────────────────────────────────────────────────
+            Text(
+                text = "Thapar Bites",
+                fontSize = 34.sp,
+                fontWeight = FontWeight.Bold,
+                color = OrangePrimary,
+                letterSpacing = 1.sp,
+                modifier = Modifier.alpha(titleAlpha.value)
+            )
+
+            Spacer(Modifier.height(6.dp))
+
+            // ── Tagline ───────────────────────────────────────────────────────
+            Text(
+                text = "Campus food, simplified.",
+                fontSize = 14.sp,
+                color = TextMuted,
+                letterSpacing = 0.5.sp,
+                modifier = Modifier.alpha(taglineAlpha.value)
+            )
+
+            Spacer(Modifier.height(24.dp))
+
+            // ── "Shop Partner" badge ──────────────────────────────────────────
             Box(
                 modifier = Modifier
-                    .alpha(nameAlpha.value)
-                    .offset(y = nameOffsetY.value.dp),
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text       = "Thapar Bites",
-                        fontFamily = Poppins,
-                        fontWeight = FontWeight.Bold,
-                        fontSize   = 34.sp,
-                        color      = White,
+                    .alpha(badgeAlpha.value)
+                    .offset(y = badgeOffsetY.value.dp)
+                    .background(
+                        color = OrangeDark.copy(alpha = 0.18f),
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(50)
                     )
-                    Spacer(Modifier.width(10.dp))
-                    // ── SHOP badge ────────────────────────────
-                    Box(
-                        modifier = Modifier
-                            .alpha(badgeAlpha.value)
-                            .scale(badgeScale.value)
-                            .background(
-                                color  = Gold200,
-                                shape  = androidx.compose.foundation.shape.RoundedCornerShape(6.dp),
-                            )
-                            .padding(horizontal = 8.dp, vertical = 3.dp),
-                    ) {
-                        Text(
-                            text       = "SHOP",
-                            fontFamily = Poppins,
-                            fontWeight = FontWeight.Bold,
-                            fontSize   = 13.sp,
-                            color      = Crimson700,
-                            letterSpacing = 1.sp,
-                        )
-                    }
-                }
+                    .padding(horizontal = 16.dp, vertical = 6.dp)
+            ) {
+                Text(
+                    text = "Shop Partner Portal",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = OrangePrimary,
+                    letterSpacing = 0.8.sp,
+                    textAlign = TextAlign.Center
+                )
             }
-
-            Spacer(Modifier.height(8.dp))
-
-            // ── Tagline ───────────────────────────────────────
-            Text(
-                modifier   = Modifier.alpha(tagAlpha.value),
-                text       = "Manage your shop. Feed the campus.",
-                fontFamily = Poppins,
-                fontWeight = FontWeight.Normal,
-                fontSize   = 14.sp,
-                color      = White.copy(alpha = 0.75f),
-                textAlign  = TextAlign.Center,
-            )
         }
 
-        // ── Version tag ───────────────────────────────────────
+        // ── Bottom credit ─────────────────────────────────────────────────────
         Text(
+            text = "Thapar Institute of Engineering & Technology",
+            fontSize = 11.sp,
+            color = TextMuted.copy(alpha = 0.5f),
+            letterSpacing = 0.3.sp,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 24.dp)
-                .alpha(tagAlpha.value),
-            text       = "v1.0.0",
-            fontFamily = Poppins,
-            fontWeight = FontWeight.Normal,
-            fontSize   = 12.sp,
-            color      = White.copy(alpha = 0.4f),
+                .padding(bottom = 28.dp)
+                .alpha(taglineAlpha.value)
         )
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SplashScreenPreview() {
+    SplashScreen(onSplashFinished = {})
 }
