@@ -31,15 +31,14 @@ fun HomeScreen(
     onOrderClick: (String) -> Unit
 ) {
 
-    val orangePrimary = Color(0xFFFF6B35)
-    val bgColor = Color(0xFFF8F4F0)
+    val colorScheme = MaterialTheme.colorScheme
 
     // Dummy state — replace with real data from Firestore
     var isShopOpen by remember { mutableStateOf(true) }
     val shopName = "Punjabi Tadka" // TODO: Load from FirebaseAuth / Firestore
 
     Scaffold(
-        containerColor = bgColor,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = {},
@@ -65,7 +64,10 @@ fun HomeScreen(
                     .clip(RoundedCornerShape(20.dp))
                     .background(
                         Brush.horizontalGradient(
-                            colors = listOf(orangePrimary, Color(0xFFFF8C61))
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.colorScheme.secondary
+                            )
                         )
                     )
                     .padding(20.dp)
@@ -158,7 +160,7 @@ fun HomeScreen(
                     value = "24",        // TODO: Firestore realtime
                     icon = Icons.Default.ShoppingBag,
                     iconBg = Color(0xFFFFECE5),
-                    iconTint = orangePrimary
+                    iconTint = MaterialTheme.colorScheme.primary
                 )
                 StatCard(
                     modifier = Modifier.weight(1f),
@@ -185,7 +187,7 @@ fun HomeScreen(
                 text = "Quick Actions",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1A1A1A),
+                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
 
@@ -270,7 +272,6 @@ fun HomeScreen(
                         orderId = id,
                         customerName = name,
                         status = status,
-                        orangePrimary = orangePrimary,
                         onClick = { onOrderClick(id) }
                     )
                 }
@@ -281,7 +282,7 @@ fun HomeScreen(
                 ) {
                     Text(
                         text = "View All Orders →",
-                        color = orangePrimary,
+                        color = MaterialTheme.colorScheme.primary,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Medium
                     )
@@ -305,7 +306,7 @@ private fun StatCard(
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
@@ -322,8 +323,18 @@ private fun StatCard(
                 Icon(imageVector = icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(20.dp))
             }
             Spacer(modifier = Modifier.height(10.dp))
-            Text(text = value, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1A1A1A))
-            Text(text = title, fontSize = 11.sp, color = Color(0xFF888888))
+            Text(
+                text = value,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Text(
+                text = title,
+                fontSize = 11.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
@@ -340,7 +351,7 @@ private fun QuickActionCard(
     Card(
         modifier = modifier.clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
@@ -358,8 +369,18 @@ private fun QuickActionCard(
             }
             Spacer(modifier = Modifier.width(10.dp))
             Column {
-                Text(text = title, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF1A1A1A))
-                Text(text = subtitle, fontSize = 11.sp, color = Color(0xFF888888))
+                Text(
+                    text = title,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                Text(
+                    text = subtitle,
+                    fontSize = 11.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }
@@ -370,9 +391,8 @@ private fun RecentOrderRow(
     orderId: String,
     customerName: String,
     status: String,
-    orangePrimary: Color,
     onClick: () -> Unit
-) {
+){
     val statusColor = when (status) {
         "Pending" -> Color(0xFFFFA000)
         "Preparing" -> Color(0xFF5C6BC0)
@@ -387,7 +407,7 @@ private fun RecentOrderRow(
             .fillMaxWidth()
             .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(
@@ -402,15 +422,32 @@ private fun RecentOrderRow(
                     modifier = Modifier
                         .size(38.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFFFFECE5)),
+                        .background(
+                            MaterialTheme.colorScheme.primaryContainer
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(Icons.Default.Receipt, null, tint = orangePrimary, modifier = Modifier.size(20.dp))
+                    Icon(
+                        Icons.Default.Receipt,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
-                    Text(text = orderId, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF1A1A1A))
-                    Text(text = customerName, fontSize = 12.sp, color = Color(0xFF888888))
+                    Text(
+                        text = orderId,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    Text(
+                        text = customerName,
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
             Surface(

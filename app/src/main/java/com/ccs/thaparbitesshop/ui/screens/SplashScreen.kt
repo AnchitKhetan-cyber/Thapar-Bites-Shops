@@ -2,6 +2,7 @@ package com.ccs.thaparbitesshop.ui.screens
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -15,16 +16,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.ccs.thaparbitesshop.ui.theme.ShopOrange
-import com.ccs.thaparbitesshop.ui.theme.ShopOrangeDark
-import com.ccs.thaparbitesshop.ui.theme.ShopOrangeLight
 import kotlinx.coroutines.delay
+import com.ccs.thaparbitesshop.R
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun SplashScreen(onNavigateToLogin: () -> Unit) {
+fun SplashScreen(
+    onNavigateToLogin: () -> Unit,
+    onNavigateToDashboard: () -> Unit
+) {
 
     // Animate scale of logo
     val scale = remember { Animatable(0.4f) }
@@ -47,7 +51,15 @@ fun SplashScreen(onNavigateToLogin: () -> Unit) {
         delay(300)
         taglineVisible = true
         delay(1800)
-        onNavigateToLogin()
+
+        val currentUser =
+            FirebaseAuth.getInstance().currentUser
+
+        if (currentUser != null) {
+            onNavigateToDashboard()
+        } else {
+            onNavigateToLogin()
+        }
     }
 
     Box(
@@ -55,7 +67,11 @@ fun SplashScreen(onNavigateToLogin: () -> Unit) {
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(ShopOrangeDark, ShopOrange, ShopOrangeLight)
+                    colors = listOf(
+                        MaterialTheme.colorScheme.secondary,
+                        MaterialTheme.colorScheme.primary,
+                        MaterialTheme.colorScheme.primaryContainer
+                    )
                 )
             ),
         contentAlignment = Alignment.Center
@@ -83,7 +99,7 @@ fun SplashScreen(onNavigateToLogin: () -> Unit) {
                     Icon(
                         imageVector        = Icons.Default.Store,
                         contentDescription = "Shop",
-                        tint               = ShopOrange,
+                        tint               = MaterialTheme.colorScheme.primary,
                         modifier           = Modifier.size(50.dp)
                     )
                 }
@@ -122,7 +138,7 @@ fun SplashScreen(onNavigateToLogin: () -> Unit) {
                 enter   = fadeIn(animationSpec = tween(600))
             ) {
                 Text(
-                    text  = "Manage your canteen with ease",
+                    text = "Good Food. Great Campus.",
                     color = Color.White.copy(alpha = 0.75f),
                     style = MaterialTheme.typography.bodyMedium
                 )

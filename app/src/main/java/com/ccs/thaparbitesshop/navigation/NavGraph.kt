@@ -37,8 +37,17 @@ fun ShopNavGraph(
         composable(Screen.Splash.route) {
 
             SplashScreen(
+
                 onNavigateToLogin = {
                     navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Splash.route) {
+                            inclusive = true
+                        }
+                    }
+                },
+
+                onNavigateToDashboard = {
+                    navController.navigate(Screen.Dashboard.route) {
                         popUpTo(Screen.Splash.route) {
                             inclusive = true
                         }

@@ -29,8 +29,10 @@ fun OrdersScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(36.dp)
     ) {
+
+        Spacer(modifier = Modifier.height(10.dp))
 
         OrdersHeader()
 
@@ -39,9 +41,10 @@ fun OrdersScreen(
             onSelected = viewModel::selectFilter
         )
 
+        Spacer(modifier = Modifier.height(12.dp))
+
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
@@ -64,11 +67,14 @@ private fun OrdersHeader() {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(bottom = 16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFFF6B35)
+            containerColor = MaterialTheme.colorScheme.primary
         ),
-        shape = RoundedCornerShape(24.dp)
+        shape = RoundedCornerShape(24.dp),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 6.dp
+        )
     ) {
 
         Column(
@@ -76,8 +82,8 @@ private fun OrdersHeader() {
         ) {
 
             Text(
-                text = "Live Orders",
-                color = Color.White,
+                text = "📦 Live Orders",
+                color = MaterialTheme.colorScheme.onPrimary,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -88,7 +94,8 @@ private fun OrdersHeader() {
 
             Text(
                 text = "Manage incoming orders quickly",
-                color = Color.White.copy(alpha = 0.85f)
+                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.85f),
+                fontSize = 14.sp
             )
         }
     }

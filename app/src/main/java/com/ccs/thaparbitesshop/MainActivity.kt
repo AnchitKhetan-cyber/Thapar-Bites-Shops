@@ -6,7 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.navigation.compose.rememberNavController
 import com.ccs.thaparbitesshop.navigation.ShopNavGraph
-import com.ccs.thaparbitesshop.ui.theme.ThaparBitesShopTheme
+import com.ccs.thaparbitesshop.ui.theme.ThaparBitesTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            ThaparBitesShopTheme {
+            ThaparBitesTheme {
 
                 val navController = rememberNavController()
 

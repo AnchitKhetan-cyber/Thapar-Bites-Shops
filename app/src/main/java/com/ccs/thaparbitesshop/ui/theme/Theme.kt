@@ -1,99 +1,85 @@
 package com.ccs.thaparbitesshop.ui.theme
 
 import android.app.Activity
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val LightColorScheme = lightColorScheme(
-    primary          = ShopOrange,
-    onPrimary        = ShopSurface,
-    primaryContainer = ShopOrangeLight,
-    onPrimaryContainer = ShopTextPrimary,
+private val LightColors = lightColorScheme(
+    primary = ThaparRed,
+    onPrimary = Color.White,
 
-    secondary        = ShopGold,
-    onSecondary      = ShopTextPrimary,
-    secondaryContainer = ShopGoldLight,
-    onSecondaryContainer = ShopTextPrimary,
+    secondary = ThaparDarkRed,
+    onSecondary = Color.White,
 
-    background       = ShopBackground,
-    onBackground     = ShopTextPrimary,
+    background = LightBackground,
+    onBackground = BlackPrimary,
 
-    surface          = ShopSurface,
-    onSurface        = ShopTextPrimary,
-    surfaceVariant   = ShopSurfaceVariant,
-    onSurfaceVariant = ShopTextSecondary,
+    surface = LightSurface,
+    onSurface = BlackPrimary,
 
-    outline          = ShopBorder,
-    outlineVariant   = ShopDivider,
+    surfaceVariant = Color(0xFFF0F0F0),
+    onSurfaceVariant = BlackPrimary,
 
-    error            = StatusClosed,
-    onError          = ShopSurface,
+    primaryContainer = Color(0xFFFFDAD6),
+    onPrimaryContainer = Color(0xFF410002)
 )
 
-private val DarkColorScheme = darkColorScheme(
-    primary          = ShopOrangeLight,
-    onPrimary        = ShopDarkBackground,
-    primaryContainer = ShopOrangeDark,
-    onPrimaryContainer = ShopDarkTextPrimary,
+private val DarkColors = darkColorScheme(
+    primary = ThaparRed,
+    onPrimary = Color.White,
 
-    secondary        = ShopGold,
-    onSecondary      = ShopDarkBackground,
-    secondaryContainer = Color(0xFF5C3A00),
-    onSecondaryContainer = ShopGoldLight,
+    secondary = ThaparDarkRed,
+    onSecondary = Color.White,
 
-    background       = ShopDarkBackground,
-    onBackground     = ShopDarkTextPrimary,
+    background = BlackPrimary,
+    onBackground = Color.White,
 
-    surface          = ShopDarkSurface,
-    onSurface        = ShopDarkTextPrimary,
-    surfaceVariant   = ShopDarkSurfaceVariant,
-    onSurfaceVariant = ShopDarkTextSecondary,
+    surface = DarkSurface,
+    onSurface = Color.White,
 
-    outline          = Color(0xFF5A3E30),
-    outlineVariant   = Color(0xFF3A2416),
+    surfaceVariant = Color(0xFF2A2A2A),
+    onSurfaceVariant = Color.White,
 
-    error            = Color(0xFFFF6B6B),
-    onError          = ShopDarkBackground,
+    primaryContainer = Color(0xFF93001A),
+    onPrimaryContainer = Color.White
 )
-
-// Workaround for Color import in dark scheme
-private val Color = androidx.compose.ui.graphics.Color
 
 @Composable
-fun ThaparBitesShopTheme(
+fun ThaparBitesTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = false,   // keep brand colors consistent
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-        darkTheme -> DarkColorScheme
-        else      -> LightColorScheme
-    }
+
+    val colorScheme =
+        if (darkTheme) DarkColors
+        else LightColors
 
     val view = LocalView.current
+
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+
+            window.statusBarColor =
+                colorScheme.primary.toArgb()
+
+            WindowCompat
+                .getInsetsController(window, view)
+                .isAppearanceLightStatusBars = !darkTheme
         }
     }
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography  = ShopTypography,
-        content     = content
+        typography = ShopTypography,
+        content = content
     )
 }
