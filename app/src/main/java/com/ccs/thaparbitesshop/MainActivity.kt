@@ -4,10 +4,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.navigation.compose.rememberNavController
+import com.ccs.thaparbitesshop.navigation.ShopNavGraph
 import com.ccs.thaparbitesshop.ui.theme.ThaparBitesShopTheme
 
-
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -15,10 +17,13 @@ class MainActivity : ComponentActivity() {
         setContent {
             ThaparBitesShopTheme {
 
+                val navController = rememberNavController()
+
+                ShopNavGraph(
+                    navController = navController
+                )
             }
         }
     }
 }
-
-
 

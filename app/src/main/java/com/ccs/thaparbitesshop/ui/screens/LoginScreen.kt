@@ -1,15 +1,16 @@
 package com.ccs.thaparbitesshop.ui.screens
 
-import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,240 +25,238 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.ccs.thaparbitesshop.ui.components.ShopPrimaryButton
-import com.ccs.thaparbitesshop.ui.components.ShopTextField
-import com.ccs.thaparbitesshop.ui.theme.ShopDivider
-import com.ccs.thaparbitesshop.ui.theme.ShopOrange
-import com.ccs.thaparbitesshop.ui.theme.ShopOrangeDark
-import com.ccs.thaparbitesshop.ui.theme.ShopTextHint
+import androidx.navigation.NavController
 
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onNavigateToRegister: () -> Unit
 ) {
+
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
-    var emailError by remember { mutableStateOf("") }
-    var passwordError by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
 
-    fun validate(): Boolean {
-        var valid = true
-        emailError = if (email.isBlank()) {
-            valid = false; "Email is required"
-        } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            valid = false; "Enter a valid email"
-        } else ""
-        passwordError = if (password.length < 6) {
-            valid = false; "Password must be at least 6 characters"
-        } else ""
-        return valid
-    }
+    val orangePrimary = Color(0xFFFF6B35)
+    val orangeLight = Color(0xFFFF8C61)
+    val bgColor = Color(0xFFF8F4F0)
 
-    Box(modifier = Modifier.fillMaxSize()) {
-
-        // Header gradient
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(bgColor)
+    ) {
+        // Top gradient header
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(240.dp)
+                .height(280.dp)
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(ShopOrangeDark, ShopOrange)
+                        colors = listOf(orangePrimary, orangeLight)
                     )
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = "🍽️",
+                    fontSize = 56.sp
                 )
-        )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Thapar Bites",
+                    fontSize = 30.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+                Text(
+                    text = "Shop Partner Portal",
+                    fontSize = 14.sp,
+                    color = Color.White.copy(alpha = 0.85f),
+                    letterSpacing = 1.5.sp
+                )
+            }
+        }
 
+        // Card overlapping the header
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .verticalScroll(rememberScrollState())
+                .padding(top = 220.dp)
+                .padding(horizontal = 24.dp)
         ) {
-            Spacer(Modifier.height(48.dp))
-
-            // Logo
-            Box(
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(CircleShape)
-                    .background(Color.White),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector        = Icons.Default.Store,
-                    contentDescription = null,
-                    tint               = ShopOrange,
-                    modifier           = Modifier.size(44.dp)
-                )
-            }
-
-            Spacer(Modifier.height(12.dp))
-
-            Text(
-                text       = "Thapar Bites Shop",
-                color      = Color.White,
-                fontSize   = 22.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text  = "Shop Management Portal",
-                color = Color.White.copy(alpha = 0.8f),
-                style = MaterialTheme.typography.bodyMedium
-            )
-
-            Spacer(Modifier.height(32.dp))
-
-            // Card
             Card(
-                modifier  = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
-                shape     = RoundedCornerShape(20.dp),
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp),
                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-                colors    = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                colors = CardDefaults.cardColors(containerColor = Color.White)
             ) {
                 Column(
-                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 28.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(28.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text       = "Welcome Back!",
-                        style      = MaterialTheme.typography.headlineMedium,
+                        text = "Welcome Back",
+                        fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
-                        color      = MaterialTheme.colorScheme.onSurface
+                        color = Color(0xFF1A1A1A)
                     )
                     Text(
-                        text  = "Sign in to manage your shop",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        text = "Sign in to manage your shop",
+                        fontSize = 13.sp,
+                        color = Color(0xFF888888),
                         modifier = Modifier.padding(top = 4.dp)
                     )
 
-                    Spacer(Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(28.dp))
 
-                    ShopTextField(
-                        value         = email,
-                        onValueChange = { email = it; emailError = "" },
-                        label         = "Email Address",
-                        leadingIcon   = {
-                            Icon(Icons.Default.Email, contentDescription = null,
-                                tint = ShopOrange)
+                    // Email field
+                    OutlinedTextField(
+                        value = email,
+                        onValueChange = { email = it; errorMessage = "" },
+                        label = { Text("Email") },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Email,
+                                contentDescription = null,
+                                tint = orangePrimary
+                            )
                         },
-                        isError       = emailError.isNotEmpty(),
-                        errorMessage  = emailError,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = orangePrimary,
+                            focusedLabelColor = orangePrimary,
+                            cursorColor = orangePrimary
+                        )
                     )
 
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                    ShopTextField(
-                        value         = password,
-                        onValueChange = { password = it; passwordError = "" },
-                        label         = "Password",
-                        leadingIcon   = {
-                            Icon(Icons.Default.Lock, contentDescription = null,
-                                tint = ShopOrange)
+                    // Password field
+                    OutlinedTextField(
+                        value = password,
+                        onValueChange = { password = it; errorMessage = "" },
+                        label = { Text("Password") },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Lock,
+                                contentDescription = null,
+                                tint = orangePrimary
+                            )
                         },
-                        trailingIcon  = {
+                        trailingIcon = {
                             IconButton(onClick = { passwordVisible = !passwordVisible }) {
                                 Icon(
-                                    imageVector = if (passwordVisible)
-                                        Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                                    contentDescription = "Toggle password",
-                                    tint = ShopTextHint
+                                    imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                    contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                                    tint = Color(0xFF888888)
                                 )
                             }
                         },
-                        visualTransformation = if (passwordVisible)
-                            VisualTransformation.None else PasswordVisualTransformation(),
-                        isError      = passwordError.isNotEmpty(),
-                        errorMessage = passwordError,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = orangePrimary,
+                            focusedLabelColor = orangePrimary,
+                            cursorColor = orangePrimary
+                        )
                     )
 
                     // Forgot password
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 4.dp),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        TextButton(onClick = { /* TODO: forgot password */ }) {
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+                        TextButton(onClick = { /* TODO: Forgot password */ }) {
                             Text(
-                                text  = "Forgot Password?",
-                                color = MaterialTheme.colorScheme.primary,
-                                style = MaterialTheme.typography.labelMedium
+                                text = "Forgot Password?",
+                                color = orangePrimary,
+                                fontSize = 13.sp
                             )
                         }
                     }
 
-                    Spacer(Modifier.height(20.dp))
+                    // Error message
+                    if (errorMessage.isNotEmpty()) {
+                        Text(
+                            text = errorMessage,
+                            color = MaterialTheme.colorScheme.error,
+                            fontSize = 13.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                    }
 
-                    ShopPrimaryButton(
-                        text      = "Sign In",
-                        onClick   = {
-                            if (validate()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Login button
+                    Button(
+                        onClick = {
+                            if (email.isBlank() || password.isBlank()) {
+                                errorMessage = "Please fill in all fields"
+                            } else {
                                 isLoading = true
-                                // Navigation handled by parent – just call callback
+                                // TODO: Firebase Auth login
                                 onLoginSuccess()
                             }
                         },
-                        modifier  = Modifier.fillMaxWidth(),
-                        isLoading = isLoading
-                    )
-
-                    Spacer(Modifier.height(16.dp))
-
-                    // Divider
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = orangePrimary),
+                        enabled = !isLoading
                     ) {
-                        Divider(modifier = Modifier.weight(1f), color = ShopDivider)
-                        Text(
-                            text     = "  OR  ",
-                            style    = MaterialTheme.typography.bodySmall,
-                            color    = ShopTextHint
-                        )
-                        Divider(modifier = Modifier.weight(1f), color = ShopDivider)
-                    }
-
-                    Spacer(Modifier.height(16.dp))
-
-                    // Register link
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment     = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text  = "New shop owner?",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        TextButton(onClick = onNavigateToRegister) {
+                        if (isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(22.dp),
+                                color = Color.White,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
                             Text(
-                                text       = "Register Here",
-                                color      = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Bold,
-                                style      = MaterialTheme.typography.bodyMedium
+                                text = "Sign In",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold
                             )
                         }
                     }
                 }
             }
 
-            Spacer(Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-            Text(
-                text      = "© 2025 Thapar Bites. All rights reserved.",
-                style     = MaterialTheme.typography.bodySmall,
-                color     = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
-            )
-            Spacer(Modifier.height(24.dp))
+            // Register link
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "New shop partner? ",
+                    fontSize = 14.sp,
+                    color = Color(0xFF555555)
+                )
+                TextButton(onClick = { onNavigateToRegister() }) {
+                    Text(
+                        text = "Register here",
+                        color = orangePrimary,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 14.sp
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
