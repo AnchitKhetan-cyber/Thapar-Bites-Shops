@@ -1,0 +1,151 @@
+package com.ccs.thaparbitesshop.ui.screens
+
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Store
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.ccs.thaparbitesshop.ui.theme.ShopOrange
+import com.ccs.thaparbitesshop.ui.theme.ShopOrangeDark
+import com.ccs.thaparbitesshop.ui.theme.ShopOrangeLight
+import kotlinx.coroutines.delay
+
+@Composable
+fun SplashScreen(onNavigateToLogin: () -> Unit) {
+
+    // Animate scale of logo
+    val scale = remember { Animatable(0.4f) }
+    // Animate visibility of text
+    var textVisible by remember { mutableStateOf(false) }
+    // Animate visibility of tagline
+    var taglineVisible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        // Logo pop-in
+        scale.animateTo(
+            targetValue = 1f,
+            animationSpec = spring(
+                dampingRatio  = Spring.DampingRatioMediumBouncy,
+                stiffness     = Spring.StiffnessLow
+            )
+        )
+        delay(200)
+        textVisible = true
+        delay(300)
+        taglineVisible = true
+        delay(1800)
+        onNavigateToLogin()
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(ShopOrangeDark, ShopOrange, ShopOrangeLight)
+                )
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            // Logo Circle
+            Box(
+                modifier = Modifier
+                    .scale(scale.value)
+                    .size(120.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(90.dp)
+                        .clip(CircleShape)
+                        .background(Color.White),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector        = Icons.Default.Store,
+                        contentDescription = "Shop",
+                        tint               = ShopOrange,
+                        modifier           = Modifier.size(50.dp)
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(28.dp))
+
+            // App name
+            AnimatedVisibility(
+                visible = textVisible,
+                enter   = fadeIn() + slideInVertically(initialOffsetY = { it / 2 })
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text       = "Thapar Bites",
+                        color      = Color.White,
+                        fontSize   = 36.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = (-0.5).sp
+                    )
+                    Text(
+                        text       = "SHOP",
+                        color      = Color.White.copy(alpha = 0.85f),
+                        fontSize   = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 8.sp
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            // Tagline
+            AnimatedVisibility(
+                visible = taglineVisible,
+                enter   = fadeIn(animationSpec = tween(600))
+            ) {
+                Text(
+                    text  = "Manage your canteen with ease",
+                    color = Color.White.copy(alpha = 0.75f),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
+
+        // Loading indicator at bottom
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 48.dp),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            AnimatedVisibility(
+                visible = taglineVisible,
+                enter   = fadeIn(animationSpec = tween(400))
+            ) {
+                CircularProgressIndicator(
+                    color       = Color.White.copy(alpha = 0.6f),
+                    strokeWidth = 2.dp,
+                    modifier    = Modifier.size(28.dp)
+                )
+            }
+        }
+    }
+}
