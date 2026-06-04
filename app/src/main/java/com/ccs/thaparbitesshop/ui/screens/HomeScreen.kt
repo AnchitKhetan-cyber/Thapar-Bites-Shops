@@ -20,7 +20,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ccs.thaparbitesshop.domain.model.ShopOrder
+import com.ccs.thaparbitesshop.domain.model.OrderStatus
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,18 +31,14 @@ fun HomeScreen(
     onNavigateToOrders: () -> Unit,
     onNavigateToMenu: () -> Unit,
     onNavigateToProfile: () -> Unit,
-    onOrderClick: (String) -> Unit
+    onOrderClick: (String) -> Unit,
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
-
-    val colorScheme = MaterialTheme.colorScheme
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     val primaryColor = Color(0xFF7A1F3D)
     val secondaryColor = Color(0xFF4A1025)
     val accentColor = Color(0xFFC9A227)
-
-    // Dummy state — replace with real data from Firestore
-    var isShopOpen by remember { mutableStateOf(true) }
-    val shopName = "Punjabi Tadka" // TODO: Load from FirebaseAuth / Firestore
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -48,11 +47,18 @@ fun HomeScreen(
                 title = {},
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
-        },
-        bottomBar = {
-            //ShopBottomBar(navController = navController, currentRoute = "home")
         }
     ) { innerPadding ->
+
+        if (state.isLoading) {
+            Box(
+                Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = primaryColor)
+            }
+            return@Scaffold
+        }
 
         Column(
             modifier = Modifier
@@ -60,7 +66,7 @@ fun HomeScreen(
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
         ) {
-            // Header card
+            // ── Header card ──────────────────────────────────────────────────
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -68,10 +74,7 @@ fun HomeScreen(
                     .clip(RoundedCornerShape(20.dp))
                     .background(
                         Brush.horizontalGradient(
-                            colors = listOf(
-                                primaryColor,
-                                secondaryColor
-                            )
+                            colors = listOf(primaryColor, secondaryColor)
                         )
                     )
                     .padding(20.dp)
@@ -88,13 +91,12 @@ fun HomeScreen(
                             color = Color.White.copy(alpha = 0.85f)
                         )
                         Text(
-                            text = shopName,
+                            text = state.shopInfo.name,
                             fontSize = 22.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )
                         Spacer(modifier = Modifier.height(12.dp))
-                        // Shop open/close toggle
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
@@ -106,11 +108,14 @@ fun HomeScreen(
                                 modifier = Modifier
                                     .size(8.dp)
                                     .clip(CircleShape)
-                                    .background(if (isShopOpen) Color(0xFF4CAF50) else Color(0xFFFF5252))
+                                    .background(
+                                        if (state.shopInfo.isOpen) Color(0xFF4CAF50)
+                                        else Color(0xFFFF5252)
+                                    )
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = if (isShopOpen) "Shop Open" else "Shop Closed",
+                                text = if (state.shopInfo.isOpen) "Shop Open" else "Shop Closed",
                                 fontSize = 13.sp,
                                 color = Color.White,
                                 fontWeight = FontWeight.Medium
@@ -118,16 +123,15 @@ fun HomeScreen(
                         }
                     }
 
-                    // Toggle switch
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = if (isShopOpen) "Open" else "Closed",
+                            text = if (state.shopInfo.isOpen) "Open" else "Closed",
                             fontSize = 11.sp,
                             color = Color.White.copy(alpha = 0.8f)
                         )
                         Switch(
-                            checked = isShopOpen,
-                            onCheckedChange = { isShopOpen = it },
+                            checked = state.shopInfo.isOpen,
+                            onCheckedChange = { viewModel.toggleShopOpen() },
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = Color.White,
                                 checkedTrackColor = Color(0xFF4CAF50),
@@ -141,7 +145,7 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Today's Stats
+            // ── Today's Stats ────────────────────────────────────────────────
             Text(
                 text = "Today's Overview",
                 fontSize = 16.sp,
@@ -161,7 +165,7 @@ fun HomeScreen(
                 StatCard(
                     modifier = Modifier.weight(1f),
                     title = "Orders",
-                    value = "24",        // TODO: Firestore realtime
+                    value = state.stats.todayOrders.toString(),
                     icon = Icons.Default.ShoppingBag,
                     iconBg = Color(0xFFFFECE5),
                     iconTint = primaryColor
@@ -169,7 +173,7 @@ fun HomeScreen(
                 StatCard(
                     modifier = Modifier.weight(1f),
                     title = "Pending",
-                    value = "3",
+                    value = state.stats.pendingOrders.toString(),
                     icon = Icons.Default.HourglassEmpty,
                     iconBg = Color(0xFFFFF8E1),
                     iconTint = Color(0xFFFFA000)
@@ -177,7 +181,7 @@ fun HomeScreen(
                 StatCard(
                     modifier = Modifier.weight(1f),
                     title = "Revenue",
-                    value = "₹1,240",
+                    value = "₹${state.stats.todayRevenue.toInt()}",
                     icon = Icons.Default.CurrencyRupee,
                     iconBg = Color(0xFFE8F5E9),
                     iconTint = Color(0xFF388E3C)
@@ -186,7 +190,7 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Quick Actions
+            // ── Quick Actions ────────────────────────────────────────────────
             Text(
                 text = "Quick Actions",
                 fontSize = 16.sp,
@@ -206,18 +210,18 @@ fun HomeScreen(
                 QuickActionCard(
                     modifier = Modifier.weight(1f),
                     title = "New Orders",
-                    subtitle = "3 pending",
+                    subtitle = "${state.stats.pendingOrders} pending",
                     icon = Icons.Default.Notifications,
                     color = primaryColor,
-                    onClick = { onNavigateToOrders() }
+                    onClick = onNavigateToOrders
                 )
                 QuickActionCard(
                     modifier = Modifier.weight(1f),
                     title = "Manage Menu",
-                    subtitle = "12 items",
+                    subtitle = "${state.stats.menuItemCount} items",
                     icon = Icons.Default.MenuBook,
                     color = accentColor,
-                    onClick = { onNavigateToMenu() }
+                    onClick = onNavigateToMenu
                 )
             }
 
@@ -235,7 +239,7 @@ fun HomeScreen(
                     subtitle = "View all",
                     icon = Icons.Default.History,
                     color = secondaryColor,
-                    onClick = { onNavigateToOrders() }
+                    onClick = onNavigateToOrders
                 )
                 QuickActionCard(
                     modifier = Modifier.weight(1f),
@@ -243,13 +247,13 @@ fun HomeScreen(
                     subtitle = "Shop settings",
                     icon = Icons.Default.Store,
                     color = primaryColor.copy(alpha = 0.8f),
-                    onClick = { onNavigateToProfile() }
+                    onClick = onNavigateToProfile
                 )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Recent Orders section
+            // ── Recent Orders ────────────────────────────────────────────────
             Text(
                 text = "Recent Orders",
                 fontSize = 16.sp,
@@ -260,36 +264,38 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Dummy recent orders — replace with Firestore data
-            val recentOrders = listOf(
-                Triple("ORD#1023", "Rajesh K.", "Preparing"),
-                Triple("ORD#1022", "Priya S.", "Ready"),
-                Triple("ORD#1021", "Amit V.", "Delivered"),
-            )
-
             Column(
                 modifier = Modifier.padding(horizontal = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                recentOrders.forEach { (id, name, status) ->
-                    RecentOrderRow(
-                        orderId = id,
-                        customerName = name,
-                        status = status,
-                        onClick = { onOrderClick(id) }
-                    )
-                }
-
-                TextButton(
-                    onClick = { onNavigateToOrders() },
-                    modifier = Modifier.align(Alignment.End)
-                ) {
+                if (state.recentOrders.isEmpty()) {
                     Text(
-                        text = "View All Orders →",
-                        color = MaterialTheme.colorScheme.primary,
+                        text = "No orders yet today",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 13.sp,
-                        fontWeight = FontWeight.Medium
+                        modifier = Modifier.padding(vertical = 8.dp)
                     )
+                } else {
+                    state.recentOrders.forEach { order ->
+                        RecentOrderRow(
+                            orderId = "#${order.tokenNumber}",
+                            customerName = order.customerName.ifBlank { "Customer" },
+                            status = order.status.label,
+                            onClick = { onOrderClick(order.id) }
+                        )
+                    }
+
+                    TextButton(
+                        onClick = onNavigateToOrders,
+                        modifier = Modifier.align(Alignment.End)
+                    ) {
+                        Text(
+                            text = "View All Orders →",
+                            color = MaterialTheme.colorScheme.primary,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                 }
             }
 
@@ -297,6 +303,8 @@ fun HomeScreen(
         }
     }
 }
+
+// ── Shared composables (unchanged from original) ──────────────────────────────
 
 @Composable
 private fun StatCard(
@@ -313,32 +321,16 @@ private fun StatCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(14.dp),
-            horizontalAlignment = Alignment.Start
-        ) {
+        Column(modifier = Modifier.padding(14.dp), horizontalAlignment = Alignment.Start) {
             Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(iconBg),
+                modifier = Modifier.size(36.dp).clip(RoundedCornerShape(10.dp)).background(iconBg),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(imageVector = icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(20.dp))
             }
             Spacer(modifier = Modifier.height(10.dp))
-            Text(
-                text = value,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-
-            Text(
-                text = title,
-                fontSize = 11.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Text(text = value, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+            Text(text = title, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -358,113 +350,60 @@ private fun QuickActionCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(color.copy(alpha = 0.12f)),
+                modifier = Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(color.copy(alpha = 0.12f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(imageVector = icon, contentDescription = null, tint = color, modifier = Modifier.size(22.dp))
             }
             Spacer(modifier = Modifier.width(10.dp))
             Column {
-                Text(
-                    text = title,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
-                Text(
-                    text = subtitle,
-                    fontSize = 11.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Text(text = title, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
+                Text(text = subtitle, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }
 }
 
 @Composable
-private fun RecentOrderRow(
-    orderId: String,
-    customerName: String,
-    status: String,
-    onClick: () -> Unit
-){
+private fun RecentOrderRow(orderId: String, customerName: String, status: String, onClick: () -> Unit) {
     val statusColor = when (status) {
-        "Pending" -> Color(0xFFFFA000)
+        "New" -> Color(0xFFFFA000)
         "Preparing" -> Color(0xFF5C6BC0)
         "Ready" -> Color(0xFF26A69A)
-        "Delivered" -> Color(0xFF4CAF50)
+        "Completed" -> Color(0xFF4CAF50)
         "Cancelled" -> Color(0xFFEF5350)
         else -> Color(0xFF888888)
     }
+    val primaryColor = Color(0xFF7A1F3D)
 
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
+        modifier = Modifier.fillMaxWidth().clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
-                    modifier = Modifier
-                        .size(38.dp)
-                        .clip(CircleShape)
-                        .background(
-                            Color(0xFF7A1F3D).copy(alpha = 0.12f)
-                        ),
+                    modifier = Modifier.size(38.dp).clip(CircleShape).background(primaryColor.copy(alpha = 0.12f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        Icons.Default.Receipt,
-                        contentDescription = null,
-                        tint = Color(0xFF7A1F3D),
-                        modifier = Modifier.size(20.dp)
-                    )
+                    Icon(Icons.Default.Receipt, contentDescription = null, tint = primaryColor, modifier = Modifier.size(20.dp))
                 }
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
-                    Text(
-                        text = orderId,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-
-                    Text(
-                        text = customerName,
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Text(text = orderId, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
+                    Text(text = customerName, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
-            Surface(
-                shape = RoundedCornerShape(20.dp),
-                color = statusColor.copy(alpha = 0.12f)
-            ) {
-                Text(
-                    text = status,
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = statusColor
-                )
+            Surface(shape = RoundedCornerShape(20.dp), color = statusColor.copy(alpha = 0.12f)) {
+                Text(text = status, modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp), fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = statusColor)
             }
         }
     }

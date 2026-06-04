@@ -11,7 +11,9 @@ data class OrderDetailUiState(
     val total: Double = 0.0,
     val paymentMethod: String = "",
     val note: String = "",
-    val status: OrderStatus = OrderStatus.NEW
+    val status: OrderStatus = OrderStatus.NEW,
+    val isLoading: Boolean = false,
+    val error: String? = null
 )
 
 data class OrderItemUi(

@@ -1,16 +1,6 @@
 package com.ccs.thaparbitesshop.model
 
 // ── Shop / Outlet ───────────────────────────────────────────────
-data class ShopInfo(
-    val id: String = "shop_01",
-    val name: String = "The Dhaba Corner",
-    val description: String = "Authentic North-Indian food & snacks",
-    val imageUrl: String = "",
-    val isOpen: Boolean = true,
-    val rating: Float = 4.3f,
-    val totalOrders: Int = 1240,
-    val category: String = "North Indian"
-)
 
 // ── Menu Item ───────────────────────────────────────────────────
 data class MenuItem(

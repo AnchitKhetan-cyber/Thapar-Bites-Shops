@@ -1,50 +1,49 @@
 package com.ccs.thaparbitesshop.ui.menu
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.ccs.thaparbitesshop.data.model.MenuItem
+import com.ccs.thaparbitesshop.data.repository.MenuRepository
+import com.ccs.thaparbitesshop.di.ShopIdProvider
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import com.ccs.thaparbitesshop.data.model.MenuItem
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MenuViewModel : ViewModel() {
+@HiltViewModel
+class MenuViewModel @Inject constructor(
+    private val menuRepository: MenuRepository,
+    private val shopIdProvider: ShopIdProvider
+) : ViewModel() {
 
+    private val _uiState = MutableStateFlow(MenuUiState(isLoading = true))
+    val uiState: StateFlow<MenuUiState> = _uiState.asStateFlow()
 
-    private var nextId = 100
+    init {
+        observeMenu()
+    }
 
+    private fun observeMenu() {
+        val shopId = shopIdProvider.get()
+        if (shopId.isBlank()) return
 
-    private val _uiState = MutableStateFlow(
-        MenuUiState(
-            items = listOf(
-                MenuItem(
-                    id = "1",
-                    name = "Paneer Burger",
-                    description = "Loaded paneer burger",
-                    category = "Burger",
-                    price = 99.0,
-                    isAvailable = true
-                ),
-                MenuItem(
-                    id = "2",
-                    name = "Cold Coffee",
-                    description = "Creamy cold coffee",
-                    category = "Beverage",
-                    price = 79.0,
-                    isAvailable = true
-                ),
-                MenuItem(
-                    id = "3",
-                    name = "Veg Pizza",
-                    description = "Cheesy veg pizza",
-                    category = "Pizza",
-                    price = 199.0,
-                    isAvailable = false
-                )
-            )
-        )
-    )
-
-    val uiState: StateFlow<MenuUiState> =
-        _uiState.asStateFlow()
+        viewModelScope.launch {
+            menuRepository
+                .getMenuStream(shopId)
+                .catch { e ->
+                    _uiState.update { it.copy(isLoading = false, error = e.message) }
+                }
+                .collect { items ->
+                    _uiState.update {
+                        it.copy(items = items, isLoading = false, error = null)
+                    }
+                }
+        }
+    }
 
     fun addItem(
         name: String,
@@ -52,9 +51,8 @@ class MenuViewModel : ViewModel() {
         category: String,
         price: Double
     ) {
-
+        val shopId = shopIdProvider.get()
         val newItem = MenuItem(
-            id = nextId++.toString(),
             name = name,
             description = description,
             category = category,
@@ -62,47 +60,35 @@ class MenuViewModel : ViewModel() {
             isAvailable = true
         )
 
-        _uiState.value = _uiState.value.copy(
-            items = _uiState.value.items + newItem
-        )
+        viewModelScope.launch {
+            menuRepository.addItem(shopId, newItem)
+                .onFailure { e ->
+                    _uiState.update { it.copy(error = e.message) }
+                }
+            // Success: stream will auto-update via snapshot listener
+        }
     }
 
     fun deleteItem(itemId: String) {
-
-        _uiState.value = _uiState.value.copy(
-            items = _uiState.value.items.filter {
-                it.id != itemId
-            }
-        )
+        viewModelScope.launch {
+            menuRepository.deleteItem(shopIdProvider.get(), itemId)
+                .onFailure { e ->
+                    _uiState.update { it.copy(error = e.message) }
+                }
+        }
     }
 
     fun toggleAvailability(itemId: String) {
+        val current = _uiState.value.items.find { it.id == itemId } ?: return
 
-        _uiState.value = _uiState.value.copy(
-            items = _uiState.value.items.map { item ->
-
-                if (item.id == itemId) {
-                    item.copy(
-                        isAvailable = !item.isAvailable
-                    )
-                } else {
-                    item
-                }
+        viewModelScope.launch {
+            menuRepository.toggleAvailability(
+                shopId = shopIdProvider.get(),
+                itemId = itemId,
+                isAvailable = !current.isAvailable
+            ).onFailure { e ->
+                _uiState.update { it.copy(error = e.message) }
             }
-        )
-    }
-
-    fun updateItem(updatedItem: MenuItem) {
-
-        _uiState.value = _uiState.value.copy(
-            items = _uiState.value.items.map { item ->
-
-                if (item.id == updatedItem.id) {
-                    updatedItem
-                } else {
-                    item
-                }
-            }
-        )
+        }
     }
 }

@@ -162,38 +162,88 @@ fun OrderDetailScreen(
 
             item {
 
-                Button(
-                    onClick = {
+                when(state.status) {
 
-                        when(state.status) {
+                    OrderStatus.NEW -> {
 
-                            OrderStatus.NEW ->
-                                viewModel.updateStatus(
-                                    OrderStatus.PREPARING
-                                )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
 
-                            OrderStatus.PREPARING ->
+                            Button(
+                                modifier = Modifier.weight(1f),
+                                onClick = {
+                                    viewModel.updateStatus(
+                                        OrderStatus.PREPARING
+                                    )
+                                }
+                            ) {
+                                Text("Accept")
+                            }
+
+                            OutlinedButton(
+                                modifier = Modifier.weight(1f),
+                                onClick = {
+                                    viewModel.updateStatus(
+                                        OrderStatus.CANCELLED
+                                    )
+                                }
+                            ) {
+                                Text("Reject")
+                            }
+                        }
+                    }
+
+                    OrderStatus.PREPARING -> {
+
+                        Button(
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = {
                                 viewModel.updateStatus(
                                     OrderStatus.READY
                                 )
+                            }
+                        ) {
+                            Text("Mark Ready")
+                        }
+                    }
 
-                            OrderStatus.READY ->
+                    OrderStatus.READY -> {
+
+                        Button(
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = {
                                 viewModel.updateStatus(
                                     OrderStatus.COMPLETED
                                 )
-
-                            OrderStatus.COMPLETED -> {}
+                            }
+                        ) {
+                            Text("Mark Completed")
                         }
-                    },
-                    modifier =
-                        Modifier.fillMaxWidth()
-                ) {
+                    }
 
-                    Text(
-                        getActionText(
-                            state.status
-                        )
-                    )
+                    OrderStatus.COMPLETED -> {
+
+                        FilledTonalButton(
+                            onClick = {},
+                            enabled = false,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Completed ✓")
+                        }
+                    }
+
+                    OrderStatus.CANCELLED -> {
+
+                        FilledTonalButton(
+                            onClick = {},
+                            enabled = false,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Cancelled ✕")
+                        }
+                    }
                 }
             }
         }
@@ -217,5 +267,8 @@ private fun getActionText(
 
         OrderStatus.COMPLETED ->
             "Completed ✓"
+
+        OrderStatus.CANCELLED ->
+            "Cancelled ✕"
     }
 }

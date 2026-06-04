@@ -1,55 +1,66 @@
 package com.ccs.thaparbitesshop.ui.orders
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.ccs.thaparbitesshop.data.repository.OrderRepository
+import com.ccs.thaparbitesshop.di.ShopIdProvider
+import com.ccs.thaparbitesshop.domain.model.ShopOrder
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import com.ccs.thaparbitesshop.domain.model.*
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class OrdersViewModel : ViewModel() {
+@HiltViewModel
+class OrdersViewModel @Inject constructor(
+    private val orderRepository: OrderRepository,
+    private val shopIdProvider: ShopIdProvider
+) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(
-        OrdersUiState(
-            orders = sampleOrders()
-        )
-    )
+    private val _uiState = MutableStateFlow(OrdersUiState())
+    val uiState: StateFlow<OrdersUiState> = _uiState.asStateFlow()
 
-    val uiState: StateFlow<OrdersUiState> =
-        _uiState.asStateFlow()
-
-    fun selectFilter(filter: String) {
-        _uiState.value =
-            _uiState.value.copy(
-                selectedFilter = filter
-            )
+    init {
+        loadOrders()
     }
 
-    companion object {
+    private fun loadOrders() {
+        val shopId = shopIdProvider.get()
+        if (shopId.isBlank()) return
 
-        private fun sampleOrders() = listOf(
-            ShopOrder(
-                id = "1042",
-                tokenNumber = 42,
-                items = listOf(
-                    "2x Chole Bhature",
-                    "1x Chai",
-                    "1x Lassi"
-                ),
-                totalAmount = 185.0,
-                status = OrderStatus.NEW,
-                timeAgo = "2 min ago"
-            ),
-            ShopOrder(
-                id = "1041",
-                tokenNumber = 41,
-                items = listOf(
-                    "1x Veg Burger",
-                    "2x Cold Coffee"
-                ),
-                totalAmount = 210.0,
-                status = OrderStatus.PREPARING,
-                timeAgo = "5 min ago"
-            )
-        )
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+
+            orderRepository
+                .getOrdersStream(shopId)
+                .catch { e ->
+                    _uiState.update {
+                        it.copy(isLoading = false, error = e.message)
+                    }
+                }
+                .collect { orders ->
+                    _uiState.update {
+                        it.copy(
+                            orders = orders,
+                            isLoading = false,
+                            error = null
+                        )
+                    }
+                }
+        }
+    }
+
+    fun selectFilter(filter: String) {
+        _uiState.update { it.copy(selectedFilter = filter) }
+    }
+
+    /** Filtered view used by the screen */
+    fun filteredOrders(): List<ShopOrder> {
+        val state = _uiState.value
+        if (state.selectedFilter == "ALL") return state.orders
+        return state.orders.filter { it.status.name == state.selectedFilter }
     }
 }
