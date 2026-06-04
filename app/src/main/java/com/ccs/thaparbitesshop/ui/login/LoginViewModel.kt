@@ -3,6 +3,7 @@ package com.ccs.thaparbitesshop.ui.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ccs.thaparbitesshop.data.repository.AuthRepository
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -98,5 +99,9 @@ class LoginViewModel @Inject constructor(
                     }
                 }
         }
+    }
+
+    fun logout() {
+        FirebaseAuth.getInstance().signOut()
     }
 }

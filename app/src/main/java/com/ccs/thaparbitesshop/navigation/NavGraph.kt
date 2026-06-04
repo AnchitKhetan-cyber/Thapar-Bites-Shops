@@ -21,6 +21,7 @@ import com.ccs.thaparbitesshop.ui.screens.ProfileScreen
 import com.ccs.thaparbitesshop.ui.screens.RegisterScreen
 import com.ccs.thaparbitesshop.ui.screens.SplashScreen
 import com.ccs.thaparbitesshop.utils.GoogleAuthHelper
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
 @Composable
@@ -199,8 +200,17 @@ fun ShopNavGraph(
         composable(Screen.Profile.route) {
 
             ProfileScreen(
-                onBack = {
-                    navController.popBackStack()
+                onBack = { },
+                onLogout = {
+
+                    FirebaseAuth.getInstance().signOut()
+
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(navController.graph.id) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
                 }
             )
         }

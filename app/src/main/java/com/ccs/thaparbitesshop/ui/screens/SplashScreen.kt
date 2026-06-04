@@ -6,6 +6,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Store
 import androidx.compose.material3.*
@@ -36,6 +37,10 @@ fun SplashScreen(
     var textVisible by remember { mutableStateOf(false) }
     // Animate visibility of tagline
     var taglineVisible by remember { mutableStateOf(false) }
+
+    val primaryColor = Color(0xFF7A1F3D)
+    val secondaryColor = Color(0xFF4A1025)
+    val accentColor = Color(0xFFC9A227)
 
     LaunchedEffect(Unit) {
         // Logo pop-in
@@ -68,9 +73,9 @@ fun SplashScreen(
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        MaterialTheme.colorScheme.secondary,
-                        MaterialTheme.colorScheme.primary,
-                        MaterialTheme.colorScheme.primaryContainer
+                        secondaryColor,
+                        primaryColor,
+                        accentColor.copy(alpha = 0.9f)
                     )
                 )
             ),
@@ -84,23 +89,26 @@ fun SplashScreen(
             Box(
                 modifier = Modifier
                     .scale(scale.value)
-                    .size(120.dp)
+                    .size(140.dp)
                     .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.15f)),
+                    .background(
+                        accentColor.copy(alpha = 0.15f)
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Box(
                     modifier = Modifier
-                        .size(90.dp)
+                        .size(150.dp)
                         .clip(CircleShape)
                         .background(Color.White),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector        = Icons.Default.Store,
-                        contentDescription = "Shop",
-                        tint               = MaterialTheme.colorScheme.primary,
-                        modifier           = Modifier.size(50.dp)
+                    Image(
+                        painter = painterResource(R.drawable.thapar_bites_logo),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(120.dp)
+                            .clip(RoundedCornerShape(70.dp))
                     )
                 }
             }
@@ -157,9 +165,9 @@ fun SplashScreen(
                 enter   = fadeIn(animationSpec = tween(400))
             ) {
                 CircularProgressIndicator(
-                    color       = Color.White.copy(alpha = 0.6f),
-                    strokeWidth = 2.dp,
-                    modifier    = Modifier.size(28.dp)
+                    color = accentColor,
+                    strokeWidth = 2.5.dp,
+                    modifier = Modifier.size(30.dp)
                 )
             }
         }

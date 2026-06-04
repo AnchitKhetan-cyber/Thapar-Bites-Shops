@@ -33,6 +33,10 @@ fun HomeScreen(
 
     val colorScheme = MaterialTheme.colorScheme
 
+    val primaryColor = Color(0xFF7A1F3D)
+    val secondaryColor = Color(0xFF4A1025)
+    val accentColor = Color(0xFFC9A227)
+
     // Dummy state — replace with real data from Firestore
     var isShopOpen by remember { mutableStateOf(true) }
     val shopName = "Punjabi Tadka" // TODO: Load from FirebaseAuth / Firestore
@@ -65,8 +69,8 @@ fun HomeScreen(
                     .background(
                         Brush.horizontalGradient(
                             colors = listOf(
-                                MaterialTheme.colorScheme.primary,
-                                MaterialTheme.colorScheme.secondary
+                                primaryColor,
+                                secondaryColor
                             )
                         )
                     )
@@ -142,7 +146,7 @@ fun HomeScreen(
                 text = "Today's Overview",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1A1A1A),
+                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
 
@@ -160,7 +164,7 @@ fun HomeScreen(
                     value = "24",        // TODO: Firestore realtime
                     icon = Icons.Default.ShoppingBag,
                     iconBg = Color(0xFFFFECE5),
-                    iconTint = MaterialTheme.colorScheme.primary
+                    iconTint = primaryColor
                 )
                 StatCard(
                     modifier = Modifier.weight(1f),
@@ -204,7 +208,7 @@ fun HomeScreen(
                     title = "New Orders",
                     subtitle = "3 pending",
                     icon = Icons.Default.Notifications,
-                    color = Color(0xFFFF6B35),
+                    color = primaryColor,
                     onClick = { onNavigateToOrders() }
                 )
                 QuickActionCard(
@@ -212,7 +216,7 @@ fun HomeScreen(
                     title = "Manage Menu",
                     subtitle = "12 items",
                     icon = Icons.Default.MenuBook,
-                    color = Color(0xFF5C6BC0),
+                    color = accentColor,
                     onClick = { onNavigateToMenu() }
                 )
             }
@@ -230,7 +234,7 @@ fun HomeScreen(
                     title = "Order History",
                     subtitle = "View all",
                     icon = Icons.Default.History,
-                    color = Color(0xFF26A69A),
+                    color = secondaryColor,
                     onClick = { onNavigateToOrders() }
                 )
                 QuickActionCard(
@@ -238,7 +242,7 @@ fun HomeScreen(
                     title = "My Profile",
                     subtitle = "Shop settings",
                     icon = Icons.Default.Store,
-                    color = Color(0xFFEF5350),
+                    color = primaryColor.copy(alpha = 0.8f),
                     onClick = { onNavigateToProfile() }
                 )
             }
@@ -250,7 +254,7 @@ fun HomeScreen(
                 text = "Recent Orders",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1A1A1A),
+                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
 
@@ -307,7 +311,7 @@ private fun StatCard(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
             modifier = Modifier.padding(14.dp),
@@ -352,7 +356,7 @@ private fun QuickActionCard(
         modifier = modifier.clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -408,7 +412,7 @@ private fun RecentOrderRow(
             .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
     ) {
         Row(
             modifier = Modifier
@@ -423,14 +427,14 @@ private fun RecentOrderRow(
                         .size(38.dp)
                         .clip(CircleShape)
                         .background(
-                            MaterialTheme.colorScheme.primaryContainer
+                            Color(0xFF7A1F3D).copy(alpha = 0.12f)
                         ),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         Icons.Default.Receipt,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = Color(0xFF7A1F3D),
                         modifier = Modifier.size(20.dp)
                     )
                 }

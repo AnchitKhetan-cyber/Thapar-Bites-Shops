@@ -29,9 +29,11 @@ fun RegisterScreen(
     onNavigateBack: () -> Unit
 ) {
 
-    val orangePrimary = Color(0xFFFF6B35)
-    val orangeLight = Color(0xFFFF8C61)
-    val bgColor = Color(0xFFF8F4F0)
+    val primaryColor = Color(0xFF7A1F3D)
+    val secondaryColor = Color(0xFF4A1025)
+    val accentColor = Color(0xFFC9A227)
+
+    val bgColor = MaterialTheme.colorScheme.background
 
     var shopName by remember { mutableStateOf("") }
     var ownerName by remember { mutableStateOf("") }
@@ -65,24 +67,17 @@ fun RegisterScreen(
                     .height(160.dp)
                     .background(
                         Brush.verticalGradient(
-                            colors = listOf(orangePrimary, orangeLight)
+                            colors = listOf(primaryColor, secondaryColor)
                         )
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    IconButton(
-                        onClick = { onNavigateBack() },
-                        modifier = Modifier
-                            .align(Alignment.Start)
-                            .padding(start = 8.dp, top = 8.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back",
-                            tint = Color.White
-                        )
-                    }
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+
                     Text(
                         text = "Register Your Shop",
                         fontSize = 24.sp,
@@ -104,17 +99,17 @@ fun RegisterScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 // Section: Shop Info
-                SectionHeader(title = "Shop Information", orangePrimary)
+                SectionHeader(title = "Shop Information", primaryColor)
 
                 OutlinedTextField(
                     value = shopName,
                     onValueChange = { shopName = it },
                     label = { Text("Shop Name") },
-                    leadingIcon = { Icon(Icons.Default.Store, null, tint = orangePrimary) },
+                    leadingIcon = { Icon(Icons.Default.Store, null, tint = primaryColor) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     singleLine = true,
-                    colors = outlinedFieldColors(orangePrimary)
+                    colors = outlinedFieldColors(primaryColor)
                 )
 
                 // Category dropdown
@@ -127,13 +122,13 @@ fun RegisterScreen(
                         onValueChange = {},
                         readOnly = true,
                         label = { Text("Shop Category") },
-                        leadingIcon = { Icon(Icons.Default.Category, null, tint = orangePrimary) },
+                        leadingIcon = { Icon(Icons.Default.Category, null, tint = primaryColor) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .menuAnchor(),
                         shape = RoundedCornerShape(12.dp),
-                        colors = outlinedFieldColors(orangePrimary)
+                        colors = outlinedFieldColors(primaryColor)
                     )
                     ExposedDropdownMenu(
                         expanded = categoryExpanded,
@@ -152,56 +147,56 @@ fun RegisterScreen(
                 }
 
                 // Section: Owner Info
-                SectionHeader(title = "Owner Details", orangePrimary)
+                SectionHeader(title = "Owner Details", primaryColor)
 
                 OutlinedTextField(
                     value = ownerName,
                     onValueChange = { ownerName = it },
                     label = { Text("Owner Name") },
-                    leadingIcon = { Icon(Icons.Default.Person, null, tint = orangePrimary) },
+                    leadingIcon = { Icon(Icons.Default.Person, null, tint = primaryColor) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     singleLine = true,
-                    colors = outlinedFieldColors(orangePrimary)
+                    colors = outlinedFieldColors(primaryColor)
                 )
 
                 OutlinedTextField(
                     value = phone,
                     onValueChange = { if (it.length <= 10) phone = it },
                     label = { Text("Phone Number") },
-                    leadingIcon = { Icon(Icons.Default.Phone, null, tint = orangePrimary) },
+                    leadingIcon = { Icon(Icons.Default.Phone, null, tint = primaryColor) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     singleLine = true,
-                    colors = outlinedFieldColors(orangePrimary)
+                    colors = outlinedFieldColors(primaryColor)
                 )
 
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
                     label = { Text("Email Address") },
-                    leadingIcon = { Icon(Icons.Default.Email, null, tint = orangePrimary) },
+                    leadingIcon = { Icon(Icons.Default.Email, null, tint = primaryColor) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     singleLine = true,
-                    colors = outlinedFieldColors(orangePrimary)
+                    colors = outlinedFieldColors(primaryColor)
                 )
 
                 // Section: Security
-                SectionHeader(title = "Set Password", orangePrimary)
+                SectionHeader(title = "Set Password", primaryColor)
 
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
                     label = { Text("Password") },
-                    leadingIcon = { Icon(Icons.Default.Lock, null, tint = orangePrimary) },
+                    leadingIcon = { Icon(Icons.Default.Lock, null, tint = primaryColor) },
                     trailingIcon = {
                         IconButton(onClick = { passwordVisible = !passwordVisible }) {
                             Icon(
                                 if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                contentDescription = null, tint = Color.Gray
+                                contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     },
@@ -210,19 +205,19 @@ fun RegisterScreen(
                     shape = RoundedCornerShape(12.dp),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     singleLine = true,
-                    colors = outlinedFieldColors(orangePrimary)
+                    colors = outlinedFieldColors(primaryColor)
                 )
 
                 OutlinedTextField(
                     value = confirmPassword,
                     onValueChange = { confirmPassword = it },
                     label = { Text("Confirm Password") },
-                    leadingIcon = { Icon(Icons.Default.Lock, null, tint = orangePrimary) },
+                    leadingIcon = { Icon(Icons.Default.Lock, null, tint = primaryColor) },
                     trailingIcon = {
                         IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
                             Icon(
                                 if (confirmPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                contentDescription = null, tint = Color.Gray
+                                contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     },
@@ -231,7 +226,7 @@ fun RegisterScreen(
                     shape = RoundedCornerShape(12.dp),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     singleLine = true,
-                    colors = outlinedFieldColors(orangePrimary)
+                    colors = outlinedFieldColors(primaryColor)
                 )
 
                 if (errorMessage.isNotEmpty()) {
@@ -271,7 +266,7 @@ fun RegisterScreen(
                         .fillMaxWidth()
                         .height(52.dp),
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = orangePrimary),
+                    colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
                     enabled = !isLoading
                 ) {
                     if (isLoading) {
@@ -294,11 +289,14 @@ fun RegisterScreen(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "Already have an account? ", fontSize = 14.sp, color = Color(0xFF555555))
+                    Text(
+                        text = "Already have an account? ",
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                    )
                     TextButton(onClick = { onNavigateBack() }) {
                         Text(
                             text = "Sign In",
-                            color = orangePrimary,
+                            color = primaryColor,
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 14.sp
                         )
@@ -312,30 +310,56 @@ fun RegisterScreen(
 }
 
 @Composable
-private fun SectionHeader(title: String, color: Color) {
+private fun SectionHeader(
+    title: String,
+    color: Color
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(top = 4.dp, bottom = 0.dp)
+        modifier = Modifier.padding(top = 4.dp)
     ) {
+
         Box(
             modifier = Modifier
                 .width(4.dp)
-                .height(18.dp)
-                .background(color, RoundedCornerShape(2.dp))
+                .height(20.dp)
+                .background(
+                    color,
+                    RoundedCornerShape(2.dp)
+                )
         )
-        Spacer(modifier = Modifier.width(8.dp))
+
+        Spacer(modifier = Modifier.width(10.dp))
+
         Text(
             text = title,
-            fontSize = 15.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = Color(0xFF1A1A1A)
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
         )
     }
 }
 
 @Composable
-private fun outlinedFieldColors(orangePrimary: Color) = OutlinedTextFieldDefaults.colors(
-    focusedBorderColor = orangePrimary,
-    focusedLabelColor = orangePrimary,
-    cursorColor = orangePrimary
+private fun outlinedFieldColors(primaryColor: Color) =
+    OutlinedTextFieldDefaults.colors(
+        focusedBorderColor = primaryColor,
+        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+
+        focusedLabelColor = primaryColor,
+        unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+
+        cursorColor = primaryColor,
+
+        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+
+        focusedLeadingIconColor = primaryColor,
+        unfocusedLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+
+        focusedTrailingIconColor = primaryColor,
+        unfocusedTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+
+        focusedContainerColor = Color.Transparent,
+        unfocusedContainerColor = Color.Transparent
 )
