@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ccs.thaparbitesshop.data.model.MenuItem
@@ -31,7 +32,7 @@ fun MenuScreen(
     onNavigateToAddFood: () -> Unit
 ) {
 
-    val viewModel: MenuViewModel = viewModel()
+    val viewModel: MenuViewModel = hiltViewModel()
 
     val state by viewModel
         .uiState

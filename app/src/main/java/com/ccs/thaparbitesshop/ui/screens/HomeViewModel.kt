@@ -40,37 +40,37 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun load() {
+
         val shopId = shopIdProvider.get()
-        if (shopId.isBlank()) return
 
-        // Fetch shop info once
-        viewModelScope.launch {
-            shopRepository.getShopInfo(shopId)
-                .onSuccess { info ->
-                    _uiState.update { it.copy(shopInfo = info, isLoading = false) }
-                }
-                .onFailure { e ->
-                    _uiState.update { it.copy(isLoading = false, error = e.message) }
-                }
+        android.util.Log.d(
+            "SHOP_DEBUG",
+            "shopId='$shopId'"
+        )
+
+        if (shopId.isBlank()) {
+
+            android.util.Log.e(
+                "SHOP_DEBUG",
+                "SHOP ID IS EMPTY"
+            )
+
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    error = "Shop ID Empty"
+                )
+            }
+
+            return
         }
 
-        // Live stats stream
-        viewModelScope.launch {
-            shopRepository.getStatsStream(shopId)
-                .catch { e -> _uiState.update { it.copy(error = e.message) } }
-                .collect { stats ->
-                    _uiState.update { it.copy(stats = stats) }
-                }
-        }
+        android.util.Log.d(
+            "SHOP_DEBUG",
+            "Starting Firestore load"
+        )
 
-        // Recent orders (latest 5)
-        viewModelScope.launch {
-            orderRepository.getOrdersStream(shopId)
-                .catch { e -> _uiState.update { it.copy(error = e.message) } }
-                .collect { orders ->
-                    _uiState.update { it.copy(recentOrders = orders.take(5)) }
-                }
-        }
+        // existing code
     }
 
     fun toggleShopOpen() {

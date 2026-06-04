@@ -217,8 +217,7 @@ fun ShopNavGraph(
 
         composable(Screen.AddFood.route) {
 
-            val menuViewModel: MenuViewModel =
-                viewModel()
+            val menuViewModel: MenuViewModel = hiltViewModel()
 
             AddFoodScreen(
                 viewModel = menuViewModel,
