@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Thapar Bites Shop"
 include(":app")
+include(":shared")

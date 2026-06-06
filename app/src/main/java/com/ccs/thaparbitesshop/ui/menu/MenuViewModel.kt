@@ -28,18 +28,54 @@ class MenuViewModel @Inject constructor(
     }
 
     private fun observeMenu() {
+
         val shopId = shopIdProvider.get()
-        if (shopId.isBlank()) return
+
+        android.util.Log.d(
+            "MENU_DEBUG",
+            "Loading menu for shopId='$shopId'"
+        )
+
+        if (shopId.isBlank()) {
+            android.util.Log.e(
+                "MENU_DEBUG",
+                "Shop ID is blank"
+            )
+            return
+        }
 
         viewModelScope.launch {
+
             menuRepository
                 .getMenuStream(shopId)
                 .catch { e ->
-                    _uiState.update { it.copy(isLoading = false, error = e.message) }
+
+                    android.util.Log.e(
+                        "MENU_DEBUG",
+                        "Menu stream failed",
+                        e
+                    )
+
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = e.message
+                        )
+                    }
                 }
                 .collect { items ->
+
+                    android.util.Log.d(
+                        "MENU_DEBUG",
+                        "Received ${items.size} menu items"
+                    )
+
                     _uiState.update {
-                        it.copy(items = items, isLoading = false, error = null)
+                        it.copy(
+                            items = items,
+                            isLoading = false,
+                            error = null
+                        )
                     }
                 }
         }
@@ -52,6 +88,12 @@ class MenuViewModel @Inject constructor(
         price: Double
     ) {
         val shopId = shopIdProvider.get()
+
+        android.util.Log.d(
+            "MENU_DEBUG",
+            "shopId = '$shopId'"
+        )
+
         val newItem = MenuItem(
             name = name,
             description = description,
@@ -61,11 +103,21 @@ class MenuViewModel @Inject constructor(
         )
 
         viewModelScope.launch {
+
             menuRepository.addItem(shopId, newItem)
-                .onFailure { e ->
-                    _uiState.update { it.copy(error = e.message) }
+                .onSuccess {
+                    android.util.Log.d(
+                        "MENU_DEBUG",
+                        "Item added successfully"
+                    )
                 }
-            // Success: stream will auto-update via snapshot listener
+                .onFailure {
+                    android.util.Log.e(
+                        "MENU_DEBUG",
+                        "Failed to add item",
+                        it
+                    )
+                }
         }
     }
 

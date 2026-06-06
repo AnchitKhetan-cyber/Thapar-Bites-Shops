@@ -2,11 +2,9 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-
-    kotlin("kapt")
-
-    id("com.google.dagger.hilt.android")
+    alias(libs.plugins.ksp)                     // replaces kapt
     id("com.google.gms.google-services")
+    // Hilt removed ❌
 }
 
 android {
@@ -19,7 +17,6 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -36,21 +33,20 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
-    buildFeatures {
-        compose = true
-    }
+    kotlinOptions { jvmTarget = "11" }
+    buildFeatures { compose = true }
 }
 
 dependencies {
+    // Shared KMP module
+    implementation(project(":shared"))
 
+    // Core
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
 
-    // Compose BOM — manages all Compose library versions
+    // Compose BOM
     implementation(platform("androidx.compose:compose-bom:2026.04.01"))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
@@ -66,25 +62,28 @@ dependencies {
     // Lifecycle
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
 
     // Navigation
     implementation("androidx.navigation:navigation-compose:2.8.5")
 
-    // Firebase BOM — manages all Firebase library versions
+    // Koin (replaces Hilt) ✅
+    implementation(libs.koin.android)
+    implementation(libs.koin.androidx.compose)
+
+    // Firebase BOM (Android only — Auth + Firestore)
     implementation(platform("com.google.firebase:firebase-bom:34.12.0"))
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
 
-    // Coroutines (Play Services)
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    // Coroutines
+    implementation(libs.kotlinx.coroutines.android)
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.1")
 
-    // Credentials / Google Sign-In
+    // Google Sign-In (Android only — stays here)
     implementation("androidx.credentials:credentials:1.3.0")
     implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
-    implementation(libs.androidx.foundation)
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
 
     // Testing
     testImplementation(libs.junit)
@@ -94,20 +93,4 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
-
-    implementation("com.google.dagger:hilt-android:2.57.1")
-
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
-
-    implementation("com.google.android.gms:play-services-auth:21.2.0")
-
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
-
-    kapt("com.google.dagger:hilt-compiler:2.57.1")
-
-}
-
-kapt {
-    correctErrorTypes = true
 }
